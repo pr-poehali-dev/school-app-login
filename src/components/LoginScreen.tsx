@@ -4,7 +4,7 @@ import Icon from "@/components/ui/icon";
 type Role = "student" | "teacher" | "parent";
 
 interface Props {
-  onLogin: () => void;
+  onLogin: (role: Role) => void;
 }
 
 const roles: { id: Role; label: string; icon: string; desc: string }[] = [
@@ -42,7 +42,7 @@ export default function LoginScreen({ onLogin }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin();
+    onLogin(role);
   };
 
   return (

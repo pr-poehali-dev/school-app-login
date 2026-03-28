@@ -2,14 +2,32 @@ import { useState } from "react";
 import LoginScreen from "@/components/LoginScreen";
 import Dashboard from "@/components/Dashboard";
 import Schedule from "@/components/Schedule";
+import TeacherDashboard from "@/components/TeacherDashboard";
+import ParentDashboard from "@/components/ParentDashboard";
+import Icon from "@/components/ui/icon";
 
-type Screen = "login" | "dashboard" | "schedule";
+type Role = "student" | "teacher" | "parent";
+type Screen = "login" | "main" | "schedule";
+
+const navByRole: Record<Role, { main: string; schedule?: string }> = {
+  student: { main: "Успеваемость", schedule: "Расписание" },
+  teacher: { main: "Кабинет учителя" },
+  parent: { main: "Кабинет родителя" },
+};
 
 export default function Index() {
   const [screen, setScreen] = useState<Screen>("login");
+  const [role, setRole] = useState<Role>("student");
 
   if (screen === "login") {
-    return <LoginScreen onLogin={() => setScreen("dashboard")} />;
+    return (
+      <LoginScreen
+        onLogin={(r: Role) => {
+          setRole(r);
+          setScreen("main");
+        }}
+      />
+    );
   }
 
   return (
@@ -24,37 +42,43 @@ export default function Index() {
           </div>
           <nav className="flex gap-1">
             <button
-              onClick={() => setScreen("dashboard")}
+              onClick={() => setScreen("main")}
               className={`px-4 py-2 text-sm font-medium rounded transition-colors ${
-                screen === "dashboard"
-                  ? "bg-white/15 text-white"
-                  : "text-white/70 hover:text-white hover:bg-white/10"
+                screen === "main" ? "bg-white/15 text-white" : "text-white/70 hover:text-white hover:bg-white/10"
               }`}
             >
-              Успеваемость
+              {navByRole[role].main}
             </button>
-            <button
-              onClick={() => setScreen("schedule")}
-              className={`px-4 py-2 text-sm font-medium rounded transition-colors ${
-                screen === "schedule"
-                  ? "bg-white/15 text-white"
-                  : "text-white/70 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              Расписание
-            </button>
+            {role === "student" && (
+              <button
+                onClick={() => setScreen("schedule")}
+                className={`px-4 py-2 text-sm font-medium rounded transition-colors ${
+                  screen === "schedule" ? "bg-white/15 text-white" : "text-white/70 hover:text-white hover:bg-white/10"
+                }`}
+              >
+                Расписание
+              </button>
+            )}
           </nav>
-          <button
-            onClick={() => setScreen("login")}
-            className="text-sm text-white/60 hover:text-white transition-colors"
-          >
-            Выйти
-          </button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-white/60 text-sm">
+              <Icon name={role === "student" ? "GraduationCap" : role === "teacher" ? "BookOpenCheck" : "Users"} size={15} />
+              <span>{role === "student" ? "Ученик" : role === "teacher" ? "Учитель" : "Родитель"}</span>
+            </div>
+            <button
+              onClick={() => setScreen("login")}
+              className="text-sm text-white/60 hover:text-white transition-colors"
+            >
+              Выйти
+            </button>
+          </div>
         </div>
       </header>
 
-      {screen === "dashboard" && <Dashboard onSchedule={() => setScreen("schedule")} />}
-      {screen === "schedule" && <Schedule />}
+      {screen === "main" && role === "student" && <Dashboard onSchedule={() => setScreen("schedule")} />}
+      {screen === "main" && role === "teacher" && <TeacherDashboard />}
+      {screen === "main" && role === "parent" && <ParentDashboard />}
+      {screen === "schedule" && role === "student" && <Schedule />}
     </div>
   );
 }
